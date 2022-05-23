@@ -1,11 +1,9 @@
 <?php
 
-use jdavidbakr\CloudfrontProxies\CloudfrontProxies;
-use LumenRateLimiting\ThrottleRequests;
-use Monicahq\Cloudflare\Http\Middleware\TrustProxies;
-use Spatie\ResponseCache\Middlewares\CacheResponse;
+require_once __DIR__.'/../vendor/autoload.php';
 
-require_once __DIR__ . '/../vendor/autoload.php';
+use App\Http\Middleware\TrustProxies;
+use LumenRateLimiting\ThrottleRequests;
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
     dirname(__DIR__)
@@ -17,19 +15,22 @@ $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
 
+$app->register(Chuckrincon\LumenConfigDiscover\DiscoverServiceProvider::class);
+
 $app->withFacades();
 $app->withEloquent();
 
-$app->register(Chuckrincon\LumenConfigDiscover\DiscoverServiceProvider::class);
 $app->register(Illuminate\Redis\RedisServiceProvider::class);
+$app->register(Irazasyed\Larasupport\Providers\ArtisanServiceProvider::class);
+$app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
+$app->register(Laravel\Tinker\TinkerServiceProvider::class);
 
 $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
-$app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
-$app->register(Spatie\ResponseCache\ResponseCacheServiceProvider::class);
-$app->register(SwooleTW\Http\LumenServiceProvider::class);
 
+$app->register(\Monicahq\Cloudflare\TrustedProxyServiceProvider::class);
+$app->register(Hhxsv5\LaravelS\Illuminate\LaravelSServiceProvider::class);
 
 $app->singleton(
     Illuminate\Contracts\Debug\ExceptionHandler::class,
@@ -44,21 +45,18 @@ $app->singleton(
 $app->configure('app');
 
 $app->middleware([
-    App\Http\Middleware\TrustProxies::class,
-    CloudfrontProxies::class,
+    \Monicahq\Cloudflare\Http\Middleware\TrustProxies::class,
     TrustProxies::class,
 ]);
 
 $app->routeMiddleware([
-    'cacheResponse' => CacheResponse::class,
-    'throttle' => ThrottleRequests::class,
+    'throttle'      => ThrottleRequests::class,
 ]);
 
 $app->router->group([
-    'namespace' => 'App\Http\Controllers',
-    'middleware' => 'throttle:api',
+    'namespace'  => 'App\Http\Controllers',
 ], function ($router) {
-    require __DIR__ . '/../routes/api.php';
+    require __DIR__.'/../routes/api.php';
 });
 
 return $app;

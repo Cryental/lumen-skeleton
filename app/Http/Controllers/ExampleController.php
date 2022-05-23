@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 class ExampleController extends Controller
 {
-    public function Example(Request $request)
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
     {
-        return response()->json(['hehe']);
+        //
     }
+
+    //
 }
